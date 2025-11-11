@@ -23,18 +23,25 @@ function App() {
     }
   };
 
+  // 習慣を削除する関数
+  const deleteHabit = (indexToDelete: number) => {
+    const updatedHabits = habits.filter((_, i) => i !== indexToDelete);
+    setHabits(updatedHabits);
+  };
+
   return (
     <div className="App">
       <Header />
       {/* 入力フォーム */}
-      <div className='add-habit'>
+      <div className='add-habit-form'>
         <input
           type="text"
+          className="add-input"
           value={newHabit}
           onChange={(e) => setNewHabit(e.target.value)}
           placeholder="新しい習慣を入力..."
         />
-        <button onClick={addHabit}>追加</button>
+        <button className="add-button" onClick={addHabit}>追加</button>
       </div>
 
       {/* 習慣リスト */}
@@ -43,6 +50,7 @@ function App() {
           <div key={index} className="habit-item">
             <input type="checkbox" id={`habit-${index}`} />
             <label htmlFor={`habit-${index}`}>{habit}</label>
+            <button className='delete-button' onClick={() => deleteHabit(index)}>削除</button>
           </div>
         ))}
       </main>
