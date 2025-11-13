@@ -3,9 +3,10 @@ import './App.css';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
+import { ulid } from 'ulid';
 
 interface Habit {
-  id: number;
+  id: string;
   name: string;
   completed: boolean;
 }
@@ -14,9 +15,9 @@ interface Habit {
 function App() {
   // 習慣の配列を管理
   const [habits, setHabits] = useState<Habit[]>([
-    { id: 1, name: '30分プログラミング', completed: false },
-    { id: 2, name: '読書する', completed: false },
-    { id: 3, name: '運動する', completed: false }
+    { id: ulid(), name: '30分プログラミング', completed: false },
+    { id: ulid(), name: '読書する', completed: false },
+    { id: ulid(), name: '運動する', completed: false }
   ]);
 
   // 入力フォームの値を管理
@@ -26,19 +27,19 @@ function App() {
   const addHabit = () => {
     if (newHabitName.trim() !== '') {
       setHabits([...habits, 
-        { id: Date.now(), name: newHabitName.trim(), completed: false }]);
+        { id: ulid(), name: newHabitName.trim(), completed: false }]);
       setNewHabitName('');
     }
   };
 
   // 習慣を削除する関数
-  const deleteHabit = (id: number) => {
+  const deleteHabit = (id: string) => {
     const updatedHabits = habits.filter((habit) => habit.id !== id);
     setHabits(updatedHabits);
   };
 
   // 習慣の完了状態を切り替える関数
-  const toggleHabitCompletion = (id: number): void => {
+  const toggleHabitCompletion = (id: string): void => {
     const updatedHabits = habits.map((habit) => 
       habit.id === id ? { ...habit, completed: !habit.completed } : habit
     );
