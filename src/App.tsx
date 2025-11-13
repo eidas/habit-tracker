@@ -4,30 +4,47 @@ import './App.css';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
 
+interface Habit {
+  id: number;
+  name: string;
+  completed: boolean;
+}
+
+
 function App() {
   // 習慣の配列を管理
-  const [habits, setHabits] = useState<string[]>([
-    '30分プログラミング',
-    '読書する',
-    '運動する'
+  const [habits, setHabits] = useState<Habit[]>([
+    { id: 1, name: '30分プログラミング', completed: false },
+    { id: 2, name: '読書する', completed: false },
+    { id: 3, name: '運動する', completed: false }
   ]);
 
   // 入力フォームの値を管理
-  const [newHabit, setNewHabit] = useState<string>('');
+  const [newHabitName, setNewHabitName] = useState<string>('');
 
   // 習慣を追加する関数
   const addHabit = () => {
-    if (newHabit.trim() !== '') {
-      setHabits([...habits, newHabit.trim()]);
-      setNewHabit('');
+    if (newHabitName.trim() !== '') {
+      setHabits([...habits, 
+        { id: Date.now(), name: newHabitName.trim(), completed: false }]);
+      setNewHabitName('');
     }
   };
 
   // 習慣を削除する関数
-  const deleteHabit = (indexToDelete: number) => {
-    const updatedHabits = habits.filter((_, i) => i !== indexToDelete);
+  const deleteHabit = (id: number) => {
+    const updatedHabits = habits.filter((habit) => habit.id !== id);
     setHabits(updatedHabits);
   };
+
+  // 習慣の完了状態を切り替える関数
+  const toggleHabitCompletion = (id: number): void => {
+    const updatedHabits = habits.map((habit) => 
+      habit.id === id ? { ...habit, completed: !habit.completed } : habit
+    );
+    setHabits(updatedHabits);
+  };
+
 
   return (
     <div className="App">
@@ -37,8 +54,8 @@ function App() {
         <input
           type="text"
           className="add-input"
-          value={newHabit}
-          onChange={(e) => setNewHabit(e.target.value)}
+          value={newHabitName}
+          onChange={(e) => setNewHabitName(e.target.value)}
           placeholder="新しい習慣を入力..."
         />
         <button className="add-button" onClick={addHabit}>追加</button>
@@ -46,11 +63,16 @@ function App() {
 
       {/* 習慣リスト */}
       <main className="App-main">
-        {habits.map((habit, index) => (
-          <div key={index} className="habit-item">
-            <input type="checkbox" id={`habit-${index}`} />
-            <label htmlFor={`habit-${index}`}>{habit}</label>
-            <button className='delete-button' onClick={() => deleteHabit(index)}>削除</button>
+        {habits.map((habit) => (
+          <div key={habit.id} className="habit-item">
+            <input 
+              type="checkbox" 
+              id={`habit-${habit.id}`} 
+              checked={habit.completed} 
+              onChange={() => toggleHabitCompletion(habit.id)} 
+            />
+            <label htmlFor={`habit-${habit.id}`}>{habit.name}</label>
+            <button className='delete-button' onClick={() => deleteHabit(habit.id)}>削除</button>
           </div>
         ))}
       </main>
