@@ -8,26 +8,41 @@ import { ulid } from 'ulid';
 interface Habit {
   id: string;
   name: string;
-  completed: boolean;
+  completedDates: string[];
 }
 
 
 function App() {
   // 習慣の配列を管理
   const [habits, setHabits] = useState<Habit[]>([
-    { id: ulid(), name: '30分プログラミング', completed: false },
-    { id: ulid(), name: '読書する', completed: false },
-    { id: ulid(), name: '運動する', completed: false }
+    { id: ulid(), name: '30分プログラミング', completedDates: [] },
+    { id: ulid(), name: '読書する', completedDates: [] },
+    { id: ulid(), name: '運動する', completedDates: [] }
   ]);
-
+  
   // 入力フォームの値を管理
   const [newHabitName, setNewHabitName] = useState<string>('');
+
+  // 今日の日付を取得
+  const today = new Date();
+  const dateString = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
+
+  // 今日の日付をYYYY-MM-DD形式で取得（新規追加）
+  const getTodayString = (): string => {
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  
+  // 今日の日付文字列
+  const todayString = getTodayString();
 
   // 習慣を追加する関数
   const addHabit = () => {
     if (newHabitName.trim() !== '') {
       setHabits([...habits, 
-        { id: ulid(), name: newHabitName.trim(), completed: false }]);
+        { id: ulid(), name: newHabitName.trim(), completedDates: [] }]);
       setNewHabitName('');
     }
   };
@@ -38,18 +53,41 @@ function App() {
     setHabits(updatedHabits);
   };
 
+  // チェック状態の確認（新規追加）
+  const isCheckedToday = (habit: Habit): boolean => {
+    return habit.completedDates.includes(todayString);
+  };
+
   // 習慣の完了状態を切り替える関数
   const toggleHabitCompletion = (id: string): void => {
-    const updatedHabits = habits.map((habit) => 
-      habit.id === id ? { ...habit, completed: !habit.completed } : habit
-    );
+    const updatedHabits = habits.map((habit) => {
+      if (habit.id === id) {
+        const isCompleted = isCheckedToday(habit);
+        const updatedCompletedDates = isCompleted
+          ? habit.completedDates.filter(date => date !== todayString) // チェックを外す
+          : [...habit.completedDates, todayString]; // チェックを入れる
+        return { ...habit, completedDates: updatedCompletedDates };
+      }
+      return habit;
+    });
     setHabits(updatedHabits);
+
+    // const updatedHabits = habits.map((habit) => {}
+    //   habit.id === id ? { ...habit, completed: !habit.completed } : habit
+    // );
+    // setHabits(updatedHabits);
   };
 
 
   return (
     <div className="App">
       <Header />
+
+      {/* 今日の日付表示 */}
+      <div className="date-display">
+        {dateString}
+      </div>
+
       {/* 入力フォーム */}
       <div className='add-habit-form'>
         <input
@@ -69,7 +107,7 @@ function App() {
             <input 
               type="checkbox" 
               id={`habit-${habit.id}`} 
-              checked={habit.completed} 
+              checked={isCheckedToday(habit)} 
               onChange={() => toggleHabitCompletion(habit.id)} 
             />
             <label htmlFor={`habit-${habit.id}`}>{habit.name}</label>
