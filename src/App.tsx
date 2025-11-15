@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
@@ -17,19 +17,69 @@ interface Habit {
   completedDates: string[];
 }
 
+// LocalStorageのキー名を定数で管理
+const STORAGE_KEY = 'habit-tracker-data';
 
 function App() {
   // ==================== State管理 ====================
 
+  // ローカルストレージから習慣データを読み込む関数
+  const loadHabitsFromStorage = (): Habit[] => {
+    try {
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        return JSON.parse(savedData) as Habit[];
+      }
+    }
+    catch (error) {
+      console.error('ローカルストレージからの読み込みに失敗しました:', error);
+    }
+
+    // 何もデータがない場合は初期値を返す
+    return [
+      { id: ulid(), name: '30分プログラミング', completedDates: [] },
+      { id: ulid(), name: '読書する', completedDates: [] },
+      { id: ulid(), name: '運動する', completedDates: [] }
+    ]
+  }
+
   // 習慣のリスト
   const [habits, setHabits] = useState<Habit[]>([
-    { id: ulid(), name: '30分プログラミング', completedDates: [] },
-    { id: ulid(), name: '読書する', completedDates: [] },
-    { id: ulid(), name: '運動する', completedDates: [] }
-  ]);
+    ...loadHabitsFromStorage()]);
   
   // 入力フォームの値を管理
   const [newHabitName, setNewHabitName] = useState<string>('');
+
+  // 習慣データが変更されるたびにローカルストレージに保存
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(habits));
+      console.log('習慣データをローカルストレージに保存しました:', habits);
+    } catch (error) {
+      console.error('ローカルストレージへの保存に失敗しました:', error);
+    }
+  }, [habits]);
+
+  /**
+   * LocalStorageのデータをクリアする関数
+   * 開発中のテスト用
+   */
+  const clearStorage = () => {
+    if (window.confirm('すべてのデータを削除しますか？')) {
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.reload();
+    }
+  };
+
+  // 現在の使用量を確認（デバッグ用）
+  const checkStorageSize = () => {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) {
+      const sizeInBytes = new Blob([data]).size;
+      return sizeInBytes;
+    }
+    return 0;
+  };
 
   // ==================== 日付関連 ====================
 
@@ -171,6 +221,14 @@ function App() {
       {/* フッター */}
       <footer className="app-footer">
         <p>継続は力なり 💪</p>
+
+        {/* デバッグ用ボタン（本番では削除推奨） */}
+        <div>
+          <label>LocalStorage使用量:{checkStorageSize()}バイト</label>
+          <button onClick={clearStorage} className="clear-button">
+            データをリセット
+          </button>
+        </div>
       </footer>
     </div>
   );
