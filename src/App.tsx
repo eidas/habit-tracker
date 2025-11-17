@@ -87,7 +87,7 @@ function App() {
   const today = new Date();
   const dateString = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`;
 
-  // 今日の日付をYYYY-MM-DD形式で取得（新規追加）
+  // 今日の日付をYYYY-MM-DD形式で取得
   const getTodayString = (): string => {
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -97,6 +97,54 @@ function App() {
   
   // 今日の日付文字列
   const todayString = getTodayString();
+
+
+   /**
+   * 日付をYYYY-MM-DD形式にフォーマット
+   */
+  const formatDate = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  /**
+   * 過去N日分の日付配列を生成（新規追加）
+   * @param days - 日数（デフォルト: 7日）
+   * @returns 日付の配列（古い順）
+   */
+  const getLastNDays = (days: number = 7): string[] => {
+    return Array.from({ length: days }, (_, i) => {
+      const date = new Date();
+      date.setDate(date.getDate() - (days - 1 - i)); // 古い日付から順に
+      return formatDate(date);
+    });
+  };
+
+  /**
+   * 日付文字列から曜日を取得
+   * @param dateStr - YYYY-MM-DD形式の日付文字列
+   * @returns 曜日（日〜土）
+   */
+  const getDayOfWeek = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const days = ['日', '月', '火', '水', '木', '金', '土'];
+    return days[date.getDay()];
+  };
+
+  /**
+   * 日付文字列から「月/日」形式に変換
+   * @param dateStr - YYYY-MM-DD形式の日付文字列
+   * @returns 月/日形式の文字列
+   */
+  const getMonthDay = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  };
+
+  // 過去7日分の日付を取得
+  const last7Days = getLastNDays(7);
 
   // ==================== 習慣の操作 ====================
 
@@ -182,6 +230,23 @@ function App() {
           placeholder="新しい習慣を入力..."
         />
         <button className="add-button" onClick={addHabit}>追加</button>
+      </div>
+
+      {/* カレンダーヘッダー */}
+      <div className="calendar-section">
+        <h2>📅 過去7日間</h2>
+        <div className="calendar-header">
+          <div className="habit-name-column">習慣</div>
+          {last7Days.map(date => (
+            <div 
+              key={date} 
+              className={`date-column ${date === todayString ? 'today' : ''}`}
+            >
+            <div className="date-month-day">{getMonthDay(date)}</div>
+              <div className="date-day-of-week">{getDayOfWeek(date)}</div>
+            </div>
+          ))}
+        </div>        
       </div>
 
       {/* 習慣リスト */}
