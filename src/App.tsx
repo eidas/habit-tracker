@@ -146,6 +146,13 @@ function App() {
   // 過去7日分の日付を取得
   const last7Days = getLastNDays(7);
 
+  // 曜日が土日の場合trueを返す
+  const isWeekend = (dateStr: string): boolean => {
+    const date = new Date(dateStr);
+    const day = date.getDay();
+    return day === 0 || day === 6; // 日曜日(0)または土曜日(6)
+  };
+
   // ==================== 習慣の操作 ====================
 
   /**
@@ -200,6 +207,33 @@ function App() {
     setHabits(updatedHabits);
   };
 
+   /**
+   * 指定した日付のチェック状態を切り替え
+   */
+  const toggleCheckOnDate = (habitId: string, date: string) => {
+    setHabits(habits.map(habit => {
+      if (habit.id !== habitId) {
+        return habit;
+      }
+
+      const isCompleted = habit.completedDates.includes(date);
+
+      if (isCompleted) {
+        // チェックを外す
+        return {
+          ...habit,
+          completedDates: habit.completedDates.filter(d => d !== date)
+        };
+      } else {
+        // チェックを入れる
+        return {
+          ...habit,
+          completedDates: [...habit.completedDates, date]
+        };
+      }
+    }));
+  };
+
   /**
    * Enterキー押下時の処理
    */
@@ -235,18 +269,44 @@ function App() {
       {/* カレンダーヘッダー */}
       <div className="calendar-section">
         <h2>📅 過去7日間</h2>
+
+        {/* 日付ヘッダー */}
         <div className="calendar-header">
           <div className="habit-name-column">習慣</div>
           {last7Days.map(date => (
             <div 
               key={date} 
-              className={`date-column ${date === todayString ? 'today' : ''}`}
+              className={`date-column ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
             >
             <div className="date-month-day">{getMonthDay(date)}</div>
               <div className="date-day-of-week">{getDayOfWeek(date)}</div>
             </div>
           ))}
         </div>        
+      </div>
+      {/* カレンダーグリッド */}
+      <div className="calendar-grid">
+        {habits.length === 0 ? (
+            <div className="calendar-empty">
+              習慣を追加すると、ここにカレンダーが表示されます
+            </div>
+          ) : (habits.map(habit => (
+          <div key={habit.id} className="calendar-row">
+            <div className="habit-name-column">
+              {habit.name}
+            </div>
+            {last7Days.map(date => (
+              <div 
+                key={date} 
+                className={`calendar-cell ${habit.completedDates.includes(date) ? 'completed' : ''}`}
+                onClick={() => toggleCheckOnDate(habit.id, date)}
+                title={`${habit.name} - ${getMonthDay(date)}`}
+              >
+                {habit.completedDates.includes(date) ? '✔️' : ''}
+              </div>
+            ))}
+          </div>
+        )))}
       </div>
 
       {/* 習慣リスト */}
