@@ -50,6 +50,10 @@ function App() {
   // 入力フォームの値を管理
   const [newHabitName, setNewHabitName] = useState<string>('');
 
+  // カレンダーのセルにホバーしたときの情報を管理
+  const [hoveredCell, setHoveredCell] = useState<{ habitId: string; date: string } | null>(null);
+
+
   // 習慣データが変更されるたびにローカルストレージに保存
   useEffect(() => {
     try {
@@ -153,6 +157,19 @@ function App() {
     return day === 0 || day === 6; // 日曜日(0)または土曜日(6)
   };
 
+    /**
+   * 日付を読みやすい形式に変換
+   * @param dateStr - YYYY-MM-DD形式
+   * @returns 例: "11月14日(木)"
+   */
+  const formatDateForDisplay = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const dayOfWeek = getDayOfWeek(dateStr);
+    return `${month}月${day}日(${dayOfWeek})`;
+  };
+
   // ==================== 習慣の操作 ====================
 
   /**
@@ -187,6 +204,16 @@ function App() {
    */
   const isCheckedToday = (habit: Habit): boolean => {
     return habit.completedDates.includes(todayString);
+  };
+
+  /**
+   * 指定した習慣が特定の日付に完了しているか確認
+   * @param habit 確認する習慣 
+   * @param date 確認する日付（YYYY-MM-DD形式）
+   * @returns 指定した日付に完了していればtrue
+   */
+  const isCheckedOnDate = (habit: Habit, date: string): boolean => {
+    return habit.completedDates.includes(date);
   };
 
   /**
@@ -235,6 +262,13 @@ function App() {
   };
 
   /**
+   * IDから習慣を取得
+   */
+  const getHabitById = (id: string): Habit | undefined => {
+    return habits.find(habit => habit.id === id);
+  };
+
+  /**
    * Enterキー押下時の処理
    */
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -270,6 +304,19 @@ function App() {
       <div className="calendar-section">
         <h2>📅 過去7日間</h2>
 
+        {/* ツールチップ表示 */}
+        {hoveredCell && (
+          <div className="calendar-tooltip">
+            {getHabitById(hoveredCell.habitId)?.name} - {formatDateForDisplay(hoveredCell.date)}
+            <br />
+            <span className="tooltip-hint">
+              {isCheckedOnDate(getHabitById(hoveredCell.habitId)!, hoveredCell.date) 
+                ? 'クリックでチェックを外す' 
+                : 'クリックでチェックを入れる'}
+            </span>
+          </div>
+        )}
+
         {/* 日付ヘッダー */}
         <div className="calendar-header">
           <div className="habit-name-column">習慣</div>
@@ -298,8 +345,18 @@ function App() {
             {last7Days.map(date => (
               <div 
                 key={date} 
-                className={`calendar-cell ${habit.completedDates.includes(date) ? 'completed' : ''}`}
+                className={`calendar-cell ${habit.completedDates.includes(date) ? 'completed' : ''}  ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
                 onClick={() => toggleCheckOnDate(habit.id, date)}
+                onMouseEnter={() => setHoveredCell({ habitId: habit.id, date })}
+                onMouseLeave={() => setHoveredCell(null)}
+                role="button"
+                aria-label={`${habit.name} - ${formatDateForDisplay(date)} - ${isCheckedOnDate(habit, date) ? '完了済み' : '未完了'}`}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    toggleCheckOnDate(habit.id, date);
+              }
+                }}
                 title={`${habit.name} - ${getMonthDay(date)}`}
               >
                 {habit.completedDates.includes(date) ? '✔️' : ''}
@@ -307,6 +364,30 @@ function App() {
             ))}
           </div>
         )))}
+
+        {/* カレンダーの統計情報 */}
+        {habits.length > 0 && (
+          <div className="calendar-stats">
+            <div className="stat-item">
+              <span className="stat-label">今週の合計達成:</span>
+              <span className="stat-value">
+                {habits.reduce((sum, habit) => 
+                  sum + habit.completedDates.filter(date => last7Days.includes(date)).length, 0
+                )}回
+              </span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-label">平均達成率:</span>
+              <span className="stat-value">
+                {habits.length > 0 
+                  ? ((habits.reduce((sum, habit) => 
+                      sum + habit.completedDates.filter(date => last7Days.includes(date)).length, 0
+                    ) / (habits.length * 7) * 100).toFixed(1))
+                  : 0}%
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 習慣リスト */}
