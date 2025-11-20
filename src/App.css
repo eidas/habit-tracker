@@ -292,12 +292,88 @@ h1 {
   }
 }
 
+/* カレンダーヘッダーの制御部分 */
+.calendar-header-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.date-range-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.date-range-btn {
+  padding: 8px 16px;
+  background-color: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.date-range-btn:hover {
+  background-color: #f0f0f0;
+  border-color: #667eea;
+}
+
+.date-range-btn.active {
+  background-color: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+
+/* カレンダーヘッダーとグリッドに横スクロール対応 */
+.calendar-header,
+.calendar-row {
+  overflow-x: auto;
+  /* スクロールバーのスタイリング（Webkit） */
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f0f0f0;
+}
+
+.calendar-header::-webkit-scrollbar,
+.calendar-row::-webkit-scrollbar {
+  height: 8px;
+}
+
+.calendar-header::-webkit-scrollbar-track,
+.calendar-row::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.calendar-header::-webkit-scrollbar-thumb,
+.calendar-row::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.calendar-header::-webkit-scrollbar-thumb:hover,
+.calendar-row::-webkit-scrollbar-thumb:hover {
+  background: #5a6fba;
+}
+
+/* 横スクロール時にヘッダーが固定されるように */
+.calendar-section {
+  position: relative;
+}
+
+/* カレンダーヘッダー */
 .calendar-header {
   display: grid;
-  grid-template-columns: 150px repeat(7, 1fr);
+  grid-template-columns: 150px repeat(auto-fit, minmax(60px, 1fr));
   gap: 8px;
   align-items: center;
   margin-bottom: 10px;
+  min-width: min-content;
 }
 
 .habit-name-column {
@@ -360,10 +436,11 @@ h1 {
 
 .calendar-row {
   display: grid;
-  grid-template-columns: 150px repeat(7, 1fr);
+  grid-template-columns: 150px repeat(auto-fit, minmax(60px, 1fr));
   gap: 8px;
   align-items: center;
   margin-bottom: 8px;
+  min-width: min-content;
 }
 
 .calendar-habit-name {
@@ -461,13 +538,34 @@ h1 {
 
 /* レスポンシブ対応 */
 @media (max-width: 768px) {
-  .calendar-header {
-    grid-template-columns: 100px repeat(7, 1fr);
+  .calendar-header-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .calendar-header-controls h2 {
+    font-size: 18px;
+  }
+
+  .date-range-buttons {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .date-range-btn {
+    flex: 1;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .calendar-header,
+  .calendar-row {
+    grid-template-columns: 100px repeat(auto-fit, minmax(50px, 1fr));
     gap: 4px;
   }
 
   .date-month-day {
-    font-size: 14px;
+    font-size: 12px;
   }
 
   .date-day-of-week {

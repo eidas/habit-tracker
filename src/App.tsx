@@ -3,6 +3,7 @@ import './App.css';
 // import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import { ulid } from 'ulid';
+import { get } from 'http';
 
 
 /**
@@ -53,6 +54,8 @@ function App() {
   // カレンダーのセルにホバーしたときの情報を管理
   const [hoveredCell, setHoveredCell] = useState<{ habitId: string; date: string } | null>(null);
 
+  // 表示する日数を切り替えるstateの管理
+  const [displayDays, setDisplayDays] = useState<number>(7); // 7日間表示がデフォルト
 
   // 習慣データが変更されるたびにローカルストレージに保存
   useEffect(() => {
@@ -147,9 +150,6 @@ function App() {
     return `${date.getMonth() + 1}/${date.getDate()}`;
   };
 
-  // 過去7日分の日付を取得
-  const last7Days = getLastNDays(7);
-
   // 曜日が土日の場合trueを返す
   const isWeekend = (dateStr: string): boolean => {
     const date = new Date(dateStr);
@@ -169,6 +169,16 @@ function App() {
     const dayOfWeek = getDayOfWeek(dateStr);
     return `${month}月${day}日(${dayOfWeek})`;
   };
+
+
+  // 過去7日分の日付を取得
+  const last7Days = getLastNDays(7);
+
+  // 過去30日分の日付を取得
+  const last30Days = getLastNDays(30);
+
+  // 表示する日付配列を取得
+  const displayDates = getLastNDays(displayDays);
 
   // ==================== 習慣の操作 ====================
 
@@ -302,7 +312,23 @@ function App() {
 
       {/* カレンダーヘッダー */}
       <div className="calendar-section">
-        <h2>📅 過去7日間</h2>
+        <div className="calendar-header-controls" >
+          <h2>📅 過去7の記録</h2>
+          <div className="date-range-buttons">
+            <button
+              className={`date-range-button ${displayDays === 7 ? 'active' : ''}`}
+              onClick={() => setDisplayDays(7)}
+            >
+              7日間
+            </button>
+            <button
+              className={`date-range-button ${displayDays === 30 ? 'active' : ''}`}
+              onClick={() => setDisplayDays(30)}
+            >
+              30日間
+            </button>
+          </div>
+        </div>
 
         {/* ツールチップ表示 */}
         {hoveredCell && (
@@ -320,7 +346,7 @@ function App() {
         {/* 日付ヘッダー */}
         <div className="calendar-header">
           <div className="habit-name-column">習慣</div>
-          {last7Days.map(date => (
+          {displayDates.map(date => (
             <div 
               key={date} 
               className={`date-column ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
@@ -342,7 +368,7 @@ function App() {
             <div className="habit-name-column">
               {habit.name}
             </div>
-            {last7Days.map(date => (
+            {displayDates.map(date => (
               <div 
                 key={date} 
                 className={`calendar-cell ${habit.completedDates.includes(date) ? 'completed' : ''}  ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
@@ -369,10 +395,10 @@ function App() {
         {habits.length > 0 && (
           <div className="calendar-stats">
             <div className="stat-item">
-              <span className="stat-label">今週の合計達成:</span>
+              <span className="stat-label">期間中の合計達成:</span>
               <span className="stat-value">
                 {habits.reduce((sum, habit) => 
-                  sum + habit.completedDates.filter(date => last7Days.includes(date)).length, 0
+                  sum + habit.completedDates.filter(date => displayDates.includes(date)).length, 0
                 )}回
               </span>
             </div>
@@ -381,8 +407,8 @@ function App() {
               <span className="stat-value">
                 {habits.length > 0 
                   ? ((habits.reduce((sum, habit) => 
-                      sum + habit.completedDates.filter(date => last7Days.includes(date)).length, 0
-                    ) / (habits.length * 7) * 100).toFixed(1))
+                      sum + habit.completedDates.filter(date => displayDates.includes(date)).length, 0
+                    ) / (habits.length * displayDates.length) * 100).toFixed(1))
                   : 0}%
               </span>
             </div>
