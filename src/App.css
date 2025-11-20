@@ -369,11 +369,21 @@ h1 {
 /* カレンダーヘッダー */
 .calendar-header {
   display: grid;
+  /*
   grid-template-columns: 150px repeat(auto-fit, minmax(60px, 1fr));
   gap: 8px;
   align-items: center;
   margin-bottom: 10px;
   min-width: min-content;
+  */
+  /* 修正: 固定幅のカラムを使用 */
+  grid-template-columns: 150px repeat(var(--calendar-days, 7), 70px);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 10px;
+  /* 修正: 横スクロールを有効化 */
+  overflow-x: auto;
+  padding-bottom: 10px;
 }
 
 .habit-name-column {
@@ -436,11 +446,19 @@ h1 {
 
 .calendar-row {
   display: grid;
-  grid-template-columns: 150px repeat(auto-fit, minmax(60px, 1fr));
+  /* grid-template-columns: 150px repeat(auto-fit, minmax(60px, 1fr));
   gap: 8px;
   align-items: center;
   margin-bottom: 8px;
-  min-width: min-content;
+  min-width: min-content; */
+  /* 修正: 固定幅のカラムを使用 */
+  grid-template-columns: 150px repeat(var(--calendar-days, 7), 70px);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  /* 修正: 横スクロールを有効化 */
+  overflow-x: auto;
+  padding-bottom: 10px;
 }
 
 .calendar-habit-name {
@@ -560,7 +578,9 @@ h1 {
 
   .calendar-header,
   .calendar-row {
-    grid-template-columns: 100px repeat(auto-fit, minmax(50px, 1fr));
+    /* grid-template-columns: 100px repeat(auto-fit, minmax(50px, 1fr)); */
+    /* 修正: モバイルでも固定幅 */
+    grid-template-columns: 100px repeat(var(--calendar-days, 7), 60px);
     gap: 4px;
   }
 

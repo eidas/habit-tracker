@@ -67,6 +67,11 @@ function App() {
     }
   }, [habits]);
 
+  // CSS変数を設定して、グリッドカラム数を動的に変更
+  useEffect(() => {
+    document.documentElement.style.setProperty('--calendar-days', displayDays.toString());
+  }, [displayDays]);
+
   /**
    * LocalStorageのデータをクリアする関数
    * 開発中のテスト用
