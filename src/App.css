@@ -292,6 +292,33 @@ h1 {
   }
 }
 
+/* スクロールコンテナ（ヘッダーとグリッドを包む） */
+.calendar-scroll-container {
+  overflow-x: auto;
+  /* スクロールバーのスタイリング（Webkit） */
+  scrollbar-width: thin;
+  scrollbar-color: #667eea #f0f0f0;
+}
+
+.calendar-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 4px;
+}
+
+.calendar-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #5a6fba;
+}
+
+
 /* カレンダーヘッダーの制御部分 */
 .calendar-header-controls {
   display: flex;
@@ -330,36 +357,8 @@ h1 {
 }
 
 
-/* カレンダーヘッダーとグリッドに横スクロール対応 */
-.calendar-header,
-.calendar-row {
-  overflow-x: auto;
-  /* スクロールバーのスタイリング（Webkit） */
-  scrollbar-width: thin;
-  scrollbar-color: #667eea #f0f0f0;
-}
 
-.calendar-header::-webkit-scrollbar,
-.calendar-row::-webkit-scrollbar {
-  height: 8px;
-}
 
-.calendar-header::-webkit-scrollbar-track,
-.calendar-row::-webkit-scrollbar-track {
-  background: #f0f0f0;
-  border-radius: 4px;
-}
-
-.calendar-header::-webkit-scrollbar-thumb,
-.calendar-row::-webkit-scrollbar-thumb {
-  background: #667eea;
-  border-radius: 4px;
-}
-
-.calendar-header::-webkit-scrollbar-thumb:hover,
-.calendar-row::-webkit-scrollbar-thumb:hover {
-  background: #5a6fba;
-}
 
 /* 横スクロール時にヘッダーが固定されるように */
 .calendar-section {
@@ -378,11 +377,9 @@ h1 {
   */
   /* 修正: 固定幅のカラムを使用 */
   grid-template-columns: 150px repeat(var(--calendar-days, 7), 70px);
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   margin-bottom: 10px;
-  /* 修正: 横スクロールを有効化 */
-  overflow-x: auto;
   padding-bottom: 10px;
 }
 
@@ -453,11 +450,9 @@ h1 {
   min-width: min-content; */
   /* 修正: 固定幅のカラムを使用 */
   grid-template-columns: 150px repeat(var(--calendar-days, 7), 70px);
-  gap: 8px;
+  gap: 4px;
   align-items: center;
   margin-bottom: 8px;
-  /* 修正: 横スクロールを有効化 */
-  overflow-x: auto;
   padding-bottom: 10px;
 }
 

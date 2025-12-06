@@ -315,7 +315,7 @@ function App() {
         <button className="add-button" onClick={addHabit}>追加</button>
       </div>
 
-      {/* カレンダーヘッダー */}
+      {/* カレンダーセクション */}
       <div className="calendar-section">
         <div className="calendar-header-controls" >
           <h2>📅 過去7の記録</h2>
@@ -325,6 +325,12 @@ function App() {
               onClick={() => setDisplayDays(7)}
             >
               7日間
+            </button>
+            <button
+              className={`date-range-button ${displayDays === 14 ? 'active' : ''}`}
+              onClick={() => setDisplayDays(14)}
+            >
+              14日間
             </button>
             <button
               className={`date-range-button ${displayDays === 30 ? 'active' : ''}`}
@@ -348,53 +354,57 @@ function App() {
           </div>
         )}
 
-        {/* 日付ヘッダー */}
-        <div className="calendar-header">
-          <div className="habit-name-column">習慣</div>
-          {displayDates.map(date => (
-            <div 
-              key={date} 
-              className={`date-column ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
-            >
-            <div className="date-month-day">{getMonthDay(date)}</div>
-              <div className="date-day-of-week">{getDayOfWeek(date)}</div>
-            </div>
-          ))}
-        </div>        
-      </div>
-      {/* カレンダーグリッド */}
-      <div className="calendar-grid">
-        {habits.length === 0 ? (
-            <div className="calendar-empty">
-              習慣を追加すると、ここにカレンダーが表示されます
-            </div>
-          ) : (habits.map(habit => (
-          <div key={habit.id} className="calendar-row">
-            <div className="habit-name-column">
-              {habit.name}
-            </div>
+        {/* スクロールコンテナ（ヘッダーとグリッドを一つに） */}
+        <div className="calendar-scroll-container">
+
+          {/* 日付ヘッダー */}
+          <div className="calendar-header">
+            <div className="habit-name-column">習慣</div>
             {displayDates.map(date => (
               <div 
                 key={date} 
-                className={`calendar-cell ${habit.completedDates.includes(date) ? 'completed' : ''}  ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
-                onClick={() => toggleCheckOnDate(habit.id, date)}
-                onMouseEnter={() => setHoveredCell({ habitId: habit.id, date })}
-                onMouseLeave={() => setHoveredCell(null)}
-                role="button"
-                aria-label={`${habit.name} - ${formatDateForDisplay(date)} - ${isCheckedOnDate(habit, date) ? '完了済み' : '未完了'}`}
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    toggleCheckOnDate(habit.id, date);
-              }
-                }}
-                title={`${habit.name} - ${getMonthDay(date)}`}
+                className={`date-column ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
               >
-                {habit.completedDates.includes(date) ? '✔️' : ''}
+              <div className="date-month-day">{getMonthDay(date)}</div>
+                <div className="date-day-of-week">{getDayOfWeek(date)}</div>
               </div>
             ))}
+          </div>        
+          {/* カレンダーグリッド */}
+          <div className="calendar-grid">
+            {habits.length === 0 ? (
+                <div className="calendar-empty">
+                  習慣を追加すると、ここにカレンダーが表示されます
+                </div>
+              ) : (habits.map(habit => (
+              <div key={habit.id} className="calendar-row">
+                <div className="habit-name-column">
+                  {habit.name}
+                </div>
+                {displayDates.map(date => (
+                  <div 
+                    key={date} 
+                    className={`calendar-cell ${habit.completedDates.includes(date) ? 'completed' : ''}  ${date === todayString ? 'today' : ''} ${isWeekend(date) ? 'weekend' : ''}`}
+                    onClick={() => toggleCheckOnDate(habit.id, date)}
+                    onMouseEnter={() => setHoveredCell({ habitId: habit.id, date })}
+                    onMouseLeave={() => setHoveredCell(null)}
+                    role="button"
+                    aria-label={`${habit.name} - ${formatDateForDisplay(date)} - ${isCheckedOnDate(habit, date) ? '完了済み' : '未完了'}`}
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        toggleCheckOnDate(habit.id, date);
+                  }
+                    }}
+                    title={`${habit.name} - ${getMonthDay(date)}`}
+                  >
+                    {habit.completedDates.includes(date) ? '✔️' : ''}
+                  </div>
+                ))}
+              </div>
+            )))}
           </div>
-        )))}
+        </div>
 
         {/* カレンダーの統計情報 */}
         {habits.length > 0 && (
