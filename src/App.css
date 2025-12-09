@@ -221,30 +221,6 @@ h1 {
   font-size: 14px;
 }
 
-/* ==================== レスポンシブ対応 ==================== */
-
-@media (max-width: 768px) {
-  .App {
-    padding: 20px;
-    margin: 0 10px;
-  }
-
-  .app-header h1 {
-    font-size: 24px;
-  }
-
-  .date-display {
-    font-size: 16px;
-  }
-
-  .add-habit {
-    flex-direction: column;
-  }
-
-  .habit-label {
-    font-size: 16px;
-  }
-}
 
 /* ==================== カレンダーセクション ==================== */
 
@@ -481,12 +457,20 @@ h1 {
 
 .calendar-cell:hover {
   background-color: #f0f0f0;
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .calendar-cell.checked {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  animation: completePulse 0.3s ease;
+}
+
+@keyframes completePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
 .calendar-cell.checked:hover {
@@ -549,8 +533,30 @@ h1 {
   font-size: 20px;
 }
 
-/* レスポンシブ対応 */
+
+/* ==================== レスポンシブ対応 ==================== */
 @media (max-width: 768px) {
+  .App {
+    padding: 20px;
+    margin: 0 10px;
+  }
+
+  .app-header h1 {
+    font-size: 24px;
+  }
+
+  .date-display {
+    font-size: 16px;
+  }
+
+  .add-habit {
+    flex-direction: column;
+  }
+
+  .habit-label {
+    font-size: 16px;
+  }
+
   .calendar-header-controls {
     flex-direction: column;
     align-items: flex-start;
@@ -579,6 +585,15 @@ h1 {
     gap: 4px;
   }
 
+  .calendar-cell {
+    height: 44px; /* タッチターゲット最小サイズ */
+    font-size: 20px;
+  }
+
+  .calendar-habit-name {
+    font-size: 14px;
+  }
+
   .date-month-day {
     font-size: 12px;
   }
@@ -587,4 +602,3 @@ h1 {
     font-size: 10px;
   }
 }
-
