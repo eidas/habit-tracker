@@ -292,6 +292,21 @@ function App() {
     }
   };
 
+  /**
+   * 指定期間の達成率を計算
+   * @param habit - 対象の習慣
+   * @param days - 期間（日数）
+   * @returns 達成率（0.0〜1.0の数値）
+   */
+  const calculateCompletionRate = (habit: Habit, days: number): number => {
+    const relevantDates = getLastNDays(days);
+    const completedCount = habit.completedDates.filter(date =>
+       relevantDates.includes(date)
+    ).length;
+    return (completedCount / days);
+  }
+
+
   // ==================== レンダリング ====================
   
   return (
@@ -454,7 +469,7 @@ function App() {
                 {habit.completedDates.length}回
               </span>
               <button 
-                className='delete-button' 
+                className="delete-button"
                 onClick={() => deleteHabit(habit.id)}
                 aria-label={`${habit.name}を削除`}
               >
@@ -464,6 +479,31 @@ function App() {
           ))
         )}
       </main>
+
+      {/* 各習慣の統計情報 */}
+      <div className="habit-stats">
+        <div className="stat-item">
+          <span className="stat-label">今週:</span>
+          <span className="stat-value">
+            {(habits.reduce((sum, habit) => 
+              sum + Math.round(calculateCompletionRate(habit, 7) * 100), 0) / habits.length || 0).toFixed(1)}%
+          </span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">今月:</span>
+          <span className="stat-value">
+            {(habits.reduce((sum, habit) => 
+              sum + Math.round(calculateCompletionRate(habit, 30) * 100), 0) / habits.length || 0).toFixed(1)}%
+          </span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">総達成:</span>
+          <span className="stat-value">
+            {habits.reduce((sum, habit) => 
+              (sum + habit.completedDates.length), 0)}回
+          </span>
+        </div>
+      </div>
 
       {/* フッター */}
       <footer className="app-footer">
