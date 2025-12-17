@@ -306,6 +306,92 @@ function App() {
     return (completedCount / days);
   }
 
+  /**
+   * 連続達成日数を計算
+   * @param habit - 対象の習慣
+   * @returns 連続達成日数
+   */
+  const calculateStreak = (habit: Habit): number => {
+    if (habit.completedDates.length === 0)  return 0;
+    
+    // 日付を降順にソート
+    const sortedDates = [...habit.completedDates].sort((a, b) =>
+      new Date(b).getTime() - new Date(a).getTime()
+    );
+
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 時間部分をリセット
+  
+    // 今日または昨日から始まっている
+    const latestDate = new Date(sortedDates[0]);
+    latestDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today.getTime() - latestDate.getTime()) / (1000 * 60 * 60 * 24));
+
+    // 今日か昨日でない場合はストリークは0
+    if (diffDays > 1)  return 0;
+    
+    // 連続日数をカウント
+    for (let i = 0; i < sortedDates.length; i++) {
+      const date = new Date(sortedDates[i]);
+      date.setHours(0, 0, 0, 0);
+
+      const expectedDate = new Date();
+      expectedDate.setDate(today.getDate() - streak);
+      expectedDate.setHours(0, 0, 0, 0);
+
+      if (date.getTime() === expectedDate.getTime()) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }
+
+
+  /**
+   * 最長連続達成日数を計算
+   * @param habit - 対象の習慣
+   * @returns 最長連続達成日数
+   */
+  const calculateLongestStreak = (habit: Habit): number => {
+    if (habit.completedDates.length === 0)  return 0;
+
+    // 日付を昇順にソート
+    const sortedDates = [...habit.completedDates].sort((a, b) =>
+      new Date(a).getTime() - new Date(b).getTime()
+    );
+
+    let longestStreak = 1;
+    let currentStreak = 1;
+
+    for (let i = 1; i < sortedDates.length; i++) {
+      const prevDate = new Date(sortedDates[i - 1]);
+      const currentDate = new Date(sortedDates[i]);
+
+      // 前の日付の翌日であれば連続とみなす
+      const nextDay = new Date(prevDate);
+      nextDay.setDate(prevDate.getDate() + 1);
+
+      if (currentDate.getTime() === nextDay.getTime()) {
+        currentStreak++;
+      } else {
+        // 連続が途切れた場合、最長記録を更新
+        if (currentStreak > longestStreak) {
+          longestStreak = currentStreak;
+        }
+        currentStreak = 1; // ストリークをリセット
+      }
+    }
+
+    // 最後のストリークを確認
+    if (currentStreak > longestStreak) {
+      longestStreak = currentStreak;
+    }
+
+    return longestStreak;
+  };
 
   // ==================== レンダリング ====================
   
@@ -465,6 +551,11 @@ function App() {
               <label htmlFor={`habit-${habit.id}`} className="habit-label">
                 {habit.name}
               </label>
+              {calculateStreak(habit) > 0 && (
+                <span className="streak-badge" title={`現在の連続達成日数: ${calculateStreak(habit)}日`}>
+                  🔥 {calculateStreak(habit)}日連続
+                </span>
+              )}
               <span className="completion-count"> 
                 {habit.completedDates.length}回
               </span>
@@ -501,6 +592,12 @@ function App() {
           <span className="stat-value">
             {habits.reduce((sum, habit) => 
               (sum + habit.completedDates.length), 0)}回
+          </span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">最長連続達成日数:</span>
+          <span className="stat-value">
+            {Math.max(...habits.map(habit => calculateLongestStreak(habit)), 0)}日
           </span>
         </div>
       </div>
